@@ -1,0 +1,6 @@
+data/
+__pycache__/
+*.pyc
+kamla.env
+*.zip
+*.muse-github-snapshot-sync.json

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kamla Dei — তোমার পার্সোনাল AI এজেন্ট</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ AUTH ============ -->
+<div id="authScreen">
+  <div class="authcard">
+    <div class="logo-big"><span class="kd-ring">KD</span></div>
+    <h1>Kamla Dei</h1>
+    <p class="muted center">তোমার পার্সোনাল AI এজেন্ট — চ্যাট করো, কাজ করিয়ে নাও।<br>
+      কোডিং • ফাইল • Linux • রিসার্চ — সব এক জায়গায়।</p>
+    <div class="tabs">
+      <button id="tabLogin" class="on" onclick="authTab('login')">লগইন</button>
+      <button id="tabReg" onclick="authTab('register')">রেজিস্টার</button>
+    </div>
+    <input id="aName" placeholder="তোমার নাম" class="hidden">
+    <input id="aEmail" placeholder="ইমেইল" type="email">
+    <input id="aPw" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)" type="password">
+    <div id="aErr" class="err"></div>
+    <button class="btn grad big full" id="aGo" onclick="doAuth()">লগইন</button>
+    <p class="muted center small">🆓 Free প্ল্যানে শুরু — প্রতিদিন ২০টা টাস্ক ফ্রি</p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="shell" class="hidden">
+  <aside>
+    <div class="logo">KAMLA DEI</div>
+    <button class="btn grad full" onclick="newChat()">➕ নতুন চ্যাট</button>
+    <div id="chatList"></div>
+    <nav>
+      <button class="navbtn active" data-nav="chat" onclick="showView('chat')">💬 চ্যাট</button>
+      <button class="navbtn" data-nav="files" onclick="showView('files')">📁 Files</button>
+      <button class="navbtn" data-nav="plan" onclick="showView('plan')">💎 প্ল্যান ও Key</button>
+      <button class="navbtn hidden" id="adminNav" data-nav="admin" onclick="showView('admin')">👑 অ্যাডমিন</button>
+    </nav>
+    <div class="userchip"><span id="uName">—</span><span id="uPlan" class="planbadge">Free</span></div>
+    <button class="navbtn" onclick="logout()">🚪 লগআউট</button>
+  </aside>
+
+  <main>
+    <!-- CHAT -->
+    <section id="view-chat" class="view">
+      <div class="chathead">
+        <div class="ctitle" id="chatTitle">নতুন চ্যাট</div>
+        <div class="muted"><span id="brainBadge"></span> • <span id="quota"></span></div>
+      </div>
+      <div id="msgs"></div>
+      <div id="typing" class="hidden">🧠 Kamla Dei কাজ করছে...</div>
+      <div id="approval" class="hidden">
+        <div class="txt" id="apprTxt"></div>
+        <button class="yes" onclick="decide(true)">✅ হ্যাঁ, করো</button>
+        <button class="no" onclick="decide(false)">❌ না</button>
+      </div>
+      <div class="chatbar">
+        <button class="ibtn" id="micBtn" onclick="toggleMic()" title="ভয়েসে বলো">🎙️</button>
+        <input id="inp" placeholder="Kamla Dei-কে বলো কী করতে হবে..." autocomplete="off">
+        <button class="ibtn" id="langBtn" onclick="toggleLang()" title="মাইকের ভাষা">বাং</button>
+        <button class="ibtn" id="ttsBtn" onclick="toggleTts()" title="উত্তর পড়ে শোনাও">🔇</button>
+        <button class="ibtn send" onclick="sendMsg()">➤</button>
+      </div>
+    </section>
+
+    <!-- FILES -->
+    <section id="view-files" class="view hidden">
+      <div class="chathead"><div class="ctitle">📁 তোমার Workspace</div>
+        <label class="btn grad upbtn">⬆️ আপলোড<input type="file" id="upFile" class="hidden" onchange="uploadFile()"></label>
+      </div>
+      <p class="muted pad">এজেন্টের বানানো সব ফাইল এখানে — ডাউনলোড করে নাও। আপলোড করলে এজেন্ট সেটা নিয়ে কাজ করতে পারবে।</p>
+      <div id="fileList"></div>
+    </section>
+
+    <!-- PLAN -->
+    <section id="view-plan" class="view hidden">
+      <div class="chathead"><div class="ctitle">💎 প্ল্যান ও Key</div></div>
+      <div class="cards">
+        <div class="card"><h3>তোমার প্ল্যান</h3><div class="bignum" id="dPlan">Free</div>
+          <p class="muted" id="dExp">মেয়াদ: —</p></div>
+        <div class="card"><h3>আজকের ব্যবহার</h3><div class="bignum" id="dUse">0/20</div>
+          <p class="muted">এজেন্ট টাস্ক</p></div>
+        <div class="card"><h3>🔑 Access Key বসাও</h3>
+          <div class="row"><input id="keyInp" placeholder="KD-XXXX-XXXX-XXXX">
+          <button class="btn grad" onclick="redeem()">Active</button></div>
+          <div id="keyMsg"></div></div>
+      </div>
+      <div id="planCards" class="cards"></div>
+      <p class="muted pad">আপগ্রেড: bKash/Nagad-এ পেমেন্ট করে Admin-এর কাছ থেকে key নাও → উপরে বসালেই active।</p>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="view-admin" class="view hidden">
+      <div class="chathead"><div class="ctitle">👑 অ্যাডমিন প্যানেল</div></div>
+      <div class="card wide">
+        <h3>🔑 নতুন Key তৈরি</h3>
+        <div class="row">
+          <select id="kPlan"><option value="pro">Pro</option><option value="family">Family</option></select>
+          <input id="kDays" type="number" value="30" min="1" style="max-width:110px">
+          <input id="kCount" type="number" value="1" min="1" max="50" style="max-width:90px">
+          <button class="btn grad" onclick="genKeys()">তৈরি করো</button>
+        </div>
+        <div id="newKeys" class="keysout"></div>
+      </div>
+      <div class="card wide"><h3>Key তালিকা</h3><div id="keyList" class="tbl"></div></div>
+      <div class="card wide"><h3>ইউজার তালিকা</h3><div id="userList" class="tbl"></div></div>
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

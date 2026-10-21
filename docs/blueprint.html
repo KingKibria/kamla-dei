@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পার্সোনাল AI এজেন্ট প্ল্যাটফর্ম — ব্লুপ্রিন্ট v2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;background:#0d1117;color:#e6edf3;line-height:1.8;padding:20px;max-width:900px;margin:auto}
+h1{font-size:1.9rem;text-align:center;margin:10px 0 4px;background:linear-gradient(90deg,#58a6ff,#a371f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{text-align:center;color:#8b949e;margin-bottom:28px}
+h2{color:#58a6ff;margin:30px 0 12px;font-size:1.3rem;border-bottom:1px solid #21262d;padding-bottom:6px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:18px;margin:12px 0}
+.card h3{color:#a371f7;margin-bottom:8px}
+ul{padding-left:22px}li{margin:6px 0}
+.flow{background:#0d1117;border:1px dashed #58a6ff;border-radius:10px;padding:14px;font-size:.95rem;margin:10px 0}
+.flow b{color:#7ee787}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}
+th,td{border:1px solid #30363d;padding:10px;text-align:left}
+th{background:#161b22;color:#ffa657}
+.deny{color:#f85149}.allow{color:#7ee787}
+.phase{display:flex;gap:12px;margin:10px 0}
+.num{background:#1f6feb;color:#fff;min-width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.warn{background:#3d2b00;border:1px solid #9e6a03;border-radius:10px;padding:14px;margin:14px 0}
+.warn b{color:#ffa657}
+.ok{background:#0d2b1a;border:1px solid #1f7a3d;border-radius:10px;padding:14px;margin:14px 0}
+.ok b{color:#7ee787}
+.footer{text-align:center;color:#8b949e;margin:34px 0 10px;font-size:.85rem}
+.tag{display:inline-block;background:#1f6feb22;border:1px solid #58a6ff;color:#58a6ff;border-radius:20px;padding:2px 12px;font-size:.8rem;margin:2px}
+.ver{display:inline-block;background:#a371f722;border:1px solid #a371f7;color:#a371f7;border-radius:8px;padding:2px 10px;font-size:.8rem}
+</style>
+</head>
+<body>
+
+<h1>🤖 পার্সোনাল AI এজেন্ট প্ল্যাটফর্ম</h1>
+<p class="sub">বাংলা ব্লুপ্রিন্ট <span class="ver">v2</span> — ১৯ অক্টোবর ২০২৬<br>
+<span class="tag">তোমার মতো এজেন্ট</span> <span class="tag">ইউজারের PC-তে</span> <span class="tag">Access-Key Subscription</span> <span class="tag">Ethical AI</span></p>
+
+<h2>১. ভিশন v2 — "আমার মতো এজেন্ট, সবার জন্য"</h2>
+<div class="card">
+তুমি এখন যেভাবে আমার সাথে কথা বলছো — <b>ঠিক সেই অভিজ্ঞতা</b> তোমার ইউজাররা পাবে। ইউজার বাংলায় বলবে কী করতে হবে, এজেন্ট বুঝে <b>নিজের কম্পিউটারে (ইউজারের PC-তে)</b> কাজ করে রেজাল্ট দেবে — ফাইল বানানো, ওয়েবে খোঁজা, হিসাব করা, ডকুমেন্ট লেখা, রিমাইন্ডার দেওয়া। শুধু কাজ করানোর জন্য, শুধু ethical কাজ।
+</div>
+
+<h2>২. "আমি" কী দিয়ে তৈরি — ৪টা উপাদান</h2>
+<div class="card"><ul>
+<li>🧠 <b>ব্রেইন (LLM)</b> — কথা বোঝা, প্ল্যান করা, সিদ্ধান্ত নেওয়া</li>
+<li>🖥️ <b>কম্পিউটার + হাত-পা (Tools)</b> — টার্মিনাল, ব্রাউজার, ফাইল সিস্টেম, ওয়েব সার্চ; এগুলো দিয়েই এজেন্ট <i>কাজ করে</i>, শুধু কথা বলে না</li>
+<li>🧾 <b>মেমরি</b> — ইউজারকে চেনা, আগের কথা মনে রাখা</li>
+<li>✅ <b>অনুমতি ব্যবস্থা</b> — ঝুঁকিপূর্ণ কাজের আগে ইউজারের OK নেওয়া</li>
+</ul>
+<p style="color:#8b949e;margin-top:8px">তোমার প্রোডাক্টে এই ৪টাই থাকবে — ছোট স্কেলে, ইউজারের PC-কে "কম্পিউটার" বানিয়ে।</p></div>
+
+<h2>৩. ইউজার জার্নি v2</h2>
+<div class="flow">
+① ইউজার তোমার সার্ভার/GitHub থেকে <b>PC অ্যাপ</b> ডাউনলোড করে, <b>access key</b> দিয়ে অ্যাক্টিভ করে<br>
+② চ্যাট খুলে বাংলায় লেখে: <i>"আমার দোকানের গত মাসের খরচের একটা হিসাব শিট বানাও"</i><br>
+③ এজেন্ট বুঝে প্ল্যান করে → <b>নিজের workspace-এ</b> ফাইল বানায়, হিসাব করে<br>
+④ কাজ শেষ → <i>"হয়ে গেছে ভাই, ফাইলটা এখানে 👇"</i> — সাথে কী কী করলো তার লিস্ট<br>
+⑤ ডিলিট/বাইরে পাঠানোর মতো কাজে <b>আগে অনুমতি চায়</b> — আমার approval card-এর মতো
+</div>
+
+<h2>৪. আর্কিটেকচার v2 — Local-First</h2>
+<div class="card"><h3>🔑 A. তোমার সার্ভার (হালকা — per-user VM নয়!)</h3>
+<ul>
+<li><b>লাইসেন্স সার্ভার:</b> key তৈরি, অ্যাক্টিভেশন, মেয়াদ চেক, ডিভাইস বাইন্ডিং</li>
+<li><b>ব্রেইন API প্রক্সি:</b> LLM কল তোমার সার্ভার হয়ে যাবে — quota কন্ট্রোল + এক জায়গায় বিল</li>
+<li><b>মেমরি ব্যাকআপ (ঐচ্ছিক):</b> ইউজার চাইলে মেমরি ক্লাউডে সিঙ্ক</li>
+<li>প্রতি ইউজারের জন্য আলাদা VM লাগবে না → সার্ভার খরচ <b>অনেক কম</b></li>
+</ul></div>
+<div class="card"><h3>🖥️ B. এজেন্ট রানটাইম — ইউজারের PC-তে (আসল "কম্পিউটার")</h3>
+<ul>
+<li>Python-ভিত্তিক লোকাল এজেন্ট: চ্যাট UI + এজেন্ট লুপ + টুলস</li>
+<li>টুলস sandbox-এ চলে — ইউজারের পুরো PC নয়, <b>এজেন্টের নিজের workspace ফোল্ডার</b></li>
+<li>ইউজারের ফাইল সার্ভারে যায় না — <b>প্রাইভেসি বিক্রির পয়েন্ট</b></li>
+<li>অফলাইনেও বেসিক কাজ (লোকাল মডেল থাকলে)</li>
+</ul></div>
+<div class="card"><h3>📱 C. Android — পরে (Companion)</h3>
+<ul>
+<li>প্রথমে PC-তে প্রোডাক্ট দাঁড়াবে; Android হবে চ্যাট + নোটিফিকেশন + হালকা টুলসের companion অ্যাপ</li>
+<li>ডিভাইস-অ্যাক্সেস টুলস (SMS/কল) Phase 2-এর ঐচ্ছিক মডিউল হিসেবে থাকবে</li>
+</ul></div>
+
+<h2>৫. MVP টুলস — প্রথম দিনের "হাত-পা" 🛠️</h2>
+<div class="card"><ul>
+<li><span class="allow">✔</span> <b>ফাইল:</b> পড়া, লেখা, খোঁজা,整理 (workspace-এর ভেতর)</li>
+<li><span class="allow">✔</span> <b>ডকুমেন্ট:</b> Word/Excel/PDF বানানো, বাংলা লেখা</li>
+<li><span class="allow">✔</span> <b>ওয়েব সার্চ:</b> তথ্য খুঁজে সংক্ষেপে দেওয়া</li>
+<li><span class="allow">✔</span> <b>হিসাব:</b> ক্যালকুলেশন, খরচের শিট</li>
+<li><span class="allow">✔</span> <b>রিমাইন্ডার/শিডিউল:</b> মনে করিয়ে দেওয়া</li>
+<li><span style="color:#8b949e">⏳ পরে:</span> <span style="color:#8b949e">ব্রাউজার চালানো, কোড রান করা, ইমেইল পাঠানো</span></li>
+</ul></div>
+
+<h2>৬. অনুমতি মডেল v2 — আমার approval card-এর মতো</h2>
+<div class="card"><ul>
+<li><span class="allow">✔</span> <b>সবুজ কাজ</b> (পড়া, খোঁজা, হিসাব) — সরাসরি করবে</li>
+<li><span class="allow">✔</span> <b>হলুদ কাজ</b> (ফাইল বানানো/বদলানো) — প্রথমবার জিজ্ঞেস করবে, মনে রাখবে</li>
+<li><span class="allow">✔</span> <b>লাল কাজ</b> (ডিলিট, বাইরে পাঠানো, সিস্টেম কমান্ড) — <b>প্রতিবার</b> অনুমতি</li>
+<li><span class="allow">✔</span> <b>Audit log + Kill switch</b> — কী করলো সব দেখা যাবে, এক ট্যাপে বন্ধ</li>
+</ul></div>
+
+<h2>৭. Ethical Guardrail ⛔</h2>
+<div class="card"><ul>
+<li><span class="deny">✘</span> অন্যের অ্যাকাউন্ট/ডিভাইসে ঢোকা, পাসওয়ার্ড বাইপাস</li>
+<li><span class="deny">✘</span> স্প্যাম, হয়রানি, প্রতারণা, ভুয়া পরিচয়</li>
+<li><span class="deny">✘</span> অনুমতি ছাড়া ব্যক্তিগত ডেটা সংগ্রহ/পাঠানো</li>
+<li><span class="deny">✘</span> malware-সদৃশ আচরণ, সিস্টেমের নিরাপত্তা দুর্বল করা</li>
+</ul>
+<p style="margin-top:8px;color:#8b949e">Hard-coded deny-list — ইউজার চাইলেও এজেন্ট এগুলো করবে না।</p></div>
+
+<h2>৮. Subscription (প্রস্তাব)</h2>
+<table>
+<tr><th>প্ল্যান</th><th>দাম</th><th>সুবিধা</th></tr>
+<tr><td>🆓 Free</td><td>৳০</td><td>১ PC, দিনে ২০টা টাস্ক, বেসিক টুলস</td></tr>
+<tr><td>⭐ Pro</td><td>৳৩০০/মাস</td><td>২ ডিভাইস, আনলিমিটেড টাস্ক, সব টুলস, বেশি quota</td></tr>
+<tr><td>👑 Family/Shop</td><td>৳৮০০/মাস</td><td>৫ ডিভাইস, দোকান/পরিবারের শেয়ার্ড ব্যবহার</td></tr>
+</table>
+
+<h2>৯. খরচের সৎ হিসাব v2 💰</h2>
+<div class="card"><ul>
+<li><b>সার্ভার:</b> per-user VM নেই → ছোট VPS (~$5–10/মাস) দিয়েই শুরু; স্কেলে বাড়বে</li>
+<li><b>LLM API:</b> মূল খরচ — heavy ইউজার মাসে ~$৫–১৫ বার্ন করতে পারে → quota + Pro প্ল্যানেই টিকে থাকা</li>
+<li><b>তোমার সময়:</b> Phase 1–2-ই আসল বিল্ড</li>
+</ul></div>
+
+<h2>১০. রোডম্যাপ v2</h2>
+<div class="phase"><div class="num">0</div><div><b>নাম + ব্লুপ্রিন্ট লক</b> — প্রজেক্টের নাম ঠিক</div></div>
+<div class="phase"><div class="num">1</div><div><b>সার্ভার</b> — লাইসেন্স API + ব্রেইন প্রক্সি + key অ্যাডমিন</div></div>
+<div class="phase"><div class="num">2</div><div><b>PC এজেন্ট MVP</b> — চ্যাট UI + এজেন্ট লুপ + ৫টা বেসিক টুল + approval কার্ড</div></div>
+<div class="phase"><div class="num">3</div><div><b>টুল সম্প্রসারণ</b> — ব্রাউজার, কোড রান, ইমেইল, মেমরি</div></div>
+<div class="phase"><div class="num">4</div><div><b>Subscription + Android companion</b></div></div>
+<div class="phase"><div class="num">5</div><div><b>Beta → Launch</b> — ১০–১৫ জন Chat Plus ইউজার দিয়ে টেস্ট</div></div>
+
+<h2>১১. সৎ সীমা ⚠️</h2>
+<div class="warn"><ul>
+<li><b>পুরোপুরি "আমার মতো" v1-এ নয়</b> — আমার পেছনে বড় infra আছে; v1 হবে ফোকাসড <i>কাজের</i> এজেন্ট, ধাপে ধাপে বড় হবে</li>
+<li><b>LLM ভুল করে</b> — ভুল ফাইল ডিলিট ঠেকাতে approval কার্ড বাধ্যতামূলক</li>
+<li><b>Windows-এ Python রানটাইম</b> — এক-ক্লিক installer বানাতে হবে, নইলে সাধারণ ইউজার আটকে যাবে</li>
+</ul></div>
+
+<div class="ok"><b>✅ প্রথম মাইলস্টোন প্রস্তাব:</b> Phase 1+2-এর ভিত্তি — <b>এজেন্ট লুপ</b> (কথা → প্ল্যান → টুল → রিপোর্ট) + <b>লাইসেন্স চেক</b>। এটা দাঁড়ালেই বাকি টুল যোগ করা সহজ।</div>
+
+<p class="footer">ব্লুপ্রিন্ট v2 • ১৯ অক্টোবর ২০২৬ • "আমার মতো এজেন্ট, সবার জন্য" 🚀</p>
+</body>
+</html>
