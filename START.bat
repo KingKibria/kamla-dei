@@ -1,5 +1,5 @@
 @echo off
-title Kamla Dei App v1.3.1
+title Kamla Dei App v1.3.2
 cd /d "%~dp0"
 echo.
 echo  Kamla Dei app chalu hocche - browser nije khulbe...

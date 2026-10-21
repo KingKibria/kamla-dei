@@ -55,6 +55,8 @@ PLANS = {
     "family": {"name": "Family", "price": 800, "daily": 1000, "devices": 5},
 }
 
+ENGINE_VERSION = "1.3.2"
+
 # ---------- secret for token signing (kept on disk, never printed) ----
 _secret_file = os.path.join(DATA, "secret.txt")
 if os.path.exists(_secret_file):
@@ -345,6 +347,18 @@ class Handler(BaseHTTPRequestHandler):
         conn.close()
         return user
 
+    def _bridge_user(self, conn):
+        """Hosted UI-র bridge: X-Kamla-Key হেডারের KD- key যাচাই।
+        চালু (redeem করা) ও বাতিল-না key হলে তার মালিক user ফেরত দেয়।"""
+        code = (self.headers.get("X-Kamla-Key") or "").strip().upper()
+        if not code:
+            return None
+        k = conn.execute("SELECT * FROM keys WHERE code=?",
+                         (code,)).fetchone()
+        if not k or k["revoked"] or not k["used_by"]:
+            return None
+        return get_user(conn, k["used_by"])
+
     # ----- API -----
     def do_POST(self):
         p = self.path
@@ -385,6 +399,24 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(401, {"error": "পাসওয়ার্ড মিললো না"})
                 return self._send(200, {"token": make_token(u["id"]),
                                         "name": u["name"]})
+
+            if p == "/api/bridge/auth":
+                code = (d.get("key") or "").strip().upper()
+                k = conn.execute("SELECT * FROM keys WHERE code=?",
+                                 (code,)).fetchone()
+                if not k or k["revoked"]:
+                    return self._send(401, {"ok": False,
+                                            "error": "key-টা সঠিক না"})
+                if not k["used_by"]:
+                    return self._send(403, {"ok": False, "error":
+                        "এই key এখনো কোনো অ্যাকাউন্টে চালু হয়নি — আগে "
+                        "অ্যাপে রেজিস্টার করে key-টা redeem করো"})
+                u = get_user(conn, k["used_by"])
+                plan, _, _ = user_plan(conn, u["id"])
+                return self._send(200, {"ok": True,
+                                        "token": make_token(u["id"]),
+                                        "name": u["name"], "plan": plan,
+                                        "version": ENGINE_VERSION})
 
             user = self._auth()
             if not user:
@@ -504,6 +536,24 @@ class Handler(BaseHTTPRequestHandler):
         p = self.path.split("?")[0]
         conn = db()
         try:
+            if p == "/api/health":
+                return self._send(200, {"ok": True,
+                                        "app": "Kamla Dei Engine",
+                                        "version": ENGINE_VERSION})
+            if p == "/api/status":
+                user = self._auth() or self._bridge_user(conn)
+                if not user:
+                    return self._send(401, {"ok": False,
+                                            "error": "key rejected"})
+                plan, _, _ = user_plan(conn, user["id"])
+                n_tools = len(engine_tools.TOOLS)
+                return self._send(200, {
+                    "ok": True, "app": "Kamla Dei Engine",
+                    "version": ENGINE_VERSION,
+                    "tools": n_tools, "tool_count": n_tools,
+                    "brain": RouterBrain().describe(),
+                    "brain_chain": RouterBrain().chain(),
+                    "plan": plan, "user": user["name"]})
             if p == "/api/plans":
                 return self._send(200, {"plans": PLANS})
             if p == "/api/me":
