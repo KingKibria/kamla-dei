@@ -55,7 +55,10 @@ PLANS = {
     "family": {"name": "Family", "price": 800, "daily": 1000, "devices": 5},
 }
 
-ENGINE_VERSION = "1.3.2"
+ENGINE_VERSION = "1.3.3"
+
+# Hosted UI pairing (keyless one-click connect): pair_id -> record
+PAIRINGS = {}
 
 # ---------- secret for token signing (kept on disk, never printed) ----
 _secret_file = os.path.join(DATA, "secret.txt")
@@ -418,10 +421,32 @@ class Handler(BaseHTTPRequestHandler):
                                         "name": u["name"], "plan": plan,
                                         "version": ENGINE_VERSION})
 
+            if p == "/api/bridge/pair/request":
+                pid = secrets.token_hex(4)
+                code = "%06d" % secrets.randbelow(1000000)
+                PAIRINGS[pid] = {"code": code, "status": "pending",
+                                 "ts": time.time(), "token": None,
+                                 "name": None, "plan": None}
+                return self._send(200, {"ok": True, "pair_id": pid,
+                                        "code": code, "expires_in": 120})
+
             user = self._auth()
             if not user:
                 return self._send(401, {"error": "লগইন লাগবে"})
             uid = user["id"]
+
+            if p == "/api/bridge/pair/approve":
+                pr = PAIRINGS.get(d.get("pair_id") or "")
+                if not pr or pr["status"] != "pending":
+                    return self._send(404, {"error": "pairing পাইনি"})
+                if d.get("ok"):
+                    plan, _, _ = user_plan(conn, uid)
+                    pr.update({"status": "approved",
+                               "token": make_token(uid),
+                               "name": user["name"], "plan": plan})
+                else:
+                    pr["status"] = "denied"
+                return self._send(200, {"ok": True})
 
             if p == "/api/redeem":
                 code = (d.get("code") or "").strip().upper()
@@ -554,6 +579,32 @@ class Handler(BaseHTTPRequestHandler):
                     "brain": RouterBrain().describe(),
                     "brain_chain": RouterBrain().chain(),
                     "plan": plan, "user": user["name"]})
+            if p == "/api/bridge/pair/status":
+                q = urllib.parse.parse_qs(
+                    urllib.parse.urlparse(self.path).query)
+                pid = (q.get("pair_id") or [""])[0]
+                pr = PAIRINGS.get(pid)
+                if not pr:
+                    return self._send(404, {"ok": False, "status": "unknown"})
+                if time.time() - pr["ts"] > 120:
+                    PAIRINGS.pop(pid, None)
+                    return self._send(200, {"ok": False, "status": "expired"})
+                if pr["status"] == "approved":
+                    out = {"ok": True, "status": "approved",
+                           "token": pr["token"], "name": pr["name"],
+                           "plan": pr["plan"], "version": ENGINE_VERSION}
+                    PAIRINGS.pop(pid, None)
+                    return self._send(200, out)
+                return self._send(200, {"ok": True, "status": pr["status"]})
+            if p == "/api/bridge/pair/pending":
+                user = self._auth()
+                if not user:
+                    return self._send(401, {"error": "লগইন লাগবে"})
+                pend = [{"pair_id": pid, "code": pr["code"]}
+                        for pid, pr in PAIRINGS.items()
+                        if pr["status"] == "pending"
+                        and time.time() - pr["ts"] <= 120]
+                return self._send(200, {"pending": pend})
             if p == "/api/plans":
                 return self._send(200, {"plans": PLANS})
             if p == "/api/me":

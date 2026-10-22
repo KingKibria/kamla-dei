@@ -30,6 +30,7 @@
 
 <!-- ============ APP SHELL ============ -->
 <div id="shell" class="hidden">
+  <div id="pairbar" style="display:none;background:#083344;color:#a5f3fc;padding:10px 14px;font-size:14px;text-align:center"></div>
   <aside>
     <div class="logo">KAMLA DEI</div>
     <button class="btn grad full" onclick="newChat()">➕ নতুন চ্যাট</button>
@@ -113,5 +114,33 @@
 </div>
 
 <script src="app.js"></script>
+<script>
+// PC pairing: হোস্টেড UI থেকে আসা সংযোগ-অনুরোধ এই PC-র স্ক্রিনেই অনুমোদন
+setInterval(async () => {
+  const t = localStorage.getItem('kd_token'); if (!t) return;
+  try {
+    const r = await fetch('/api/bridge/pair/pending',
+      {headers: {Authorization: 'Bearer ' + t}});
+    if (!r.ok) return;
+    const d = await r.json();
+    const bar = document.getElementById('pairbar');
+    if (!d.pending || !d.pending.length) { bar.style.display = 'none'; return; }
+    const pr = d.pending[0];
+    bar.style.display = 'block';
+    bar.innerHTML = '🔗 Kamla Dei UI থেকে PC-সংযোগের অনুরোধ — কোড: <b>' +
+      pr.code + '</b> &nbsp;<button id="pairOk">✓ Allow</button> ' +
+      '<button id="pairNo">✕ Deny</button>';
+    const send = async (ok) => {
+      await fetch('/api/bridge/pair/approve', {method: 'POST',
+        headers: {Authorization: 'Bearer ' + t,
+                  'Content-Type': 'application/json'},
+        body: JSON.stringify({pair_id: pr.pair_id, ok})});
+      bar.style.display = 'none';
+    };
+    document.getElementById('pairOk').onclick = () => send(true);
+    document.getElementById('pairNo').onclick = () => send(false);
+  } catch (e) {}
+}, 3000);
+</script>
 </body>
 </html>
