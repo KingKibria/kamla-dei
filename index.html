@@ -548,6 +548,33 @@
   .key-details summary:hover{color:var(--cyan-hot)}
   .key-details[open ] summary{color:var(--cyan-hot)}
 
+  /* ---------- step-2 launcher + numbered connect guide ---------- */
+  .step2-box{margin-top:16px;border:1px dashed rgba(255,154,46,.55);background:rgba(255,154,46,.05);padding:14px}
+  .step2-t{font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--orange)}
+  .launcher-dl-btn{display:block;width:100%;margin-top:11px;padding:16px 12px;cursor:pointer;
+    font-family:var(--bn);font-weight:700;font-size:17px;line-height:1.35;color:#2a1503;
+    background:linear-gradient(90deg,var(--orange),#ffb35c);border:1px solid #ffc98a;
+    clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+    box-shadow:0 0 22px rgba(255,154,46,.35);transition:all .2s}
+  .launcher-dl-btn:hover{box-shadow:0 0 32px rgba(255,154,46,.55)}
+  .launcher-dl-btn:active{transform:scale(.985)}
+  .dl-state{font-family:var(--bn);font-size:13.5px;color:var(--muted);line-height:1.55;margin:10px 0 0;overflow-wrap:break-word}
+  .dl-state.ok{color:#a7f3d0}
+  .dl-state.fail{color:#fecdd3}
+  .check-btn{display:block;width:100%;margin-top:11px}
+  .connect-steps{margin:14px 0 0;padding:0;list-style:none;counter-reset:cs;display:grid;gap:9px}
+  .connect-steps li{counter-increment:cs;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    font-family:var(--bn);font-size:14px;color:var(--ink);line-height:1.45}
+  .connect-steps li::before{content:counter(cs);flex:none;width:22px;height:22px;display:grid;place-items:center;
+    font-family:var(--mono);font-size:12px;color:var(--cyan-hot);border:1px solid var(--line-strong);background:rgba(34,211,238,.08)}
+  .connect-steps .cs-txt{flex:1;min-width:140px}
+  .step-state{margin-left:auto;flex:none;max-width:62%;text-align:right;overflow-wrap:break-word;
+    font-family:var(--mono);font-size:10.5px;padding:2px 8px;letter-spacing:.03em}
+  .step-state[data-state="pending"]{color:var(--faint);border:1px solid var(--line)}
+  .step-state[data-state="current"]{color:var(--amber);border:1px solid rgba(251,191,36,.5);background:rgba(251,191,36,.08)}
+  .step-state[data-state="done"]{color:var(--green);border:1px solid rgba(52,211,153,.45);background:rgba(52,211,153,.07)}
+  .step-state[data-state="failed"]{color:var(--rose);border:1px solid rgba(251,113,133,.5);background:rgba(251,113,133,.07)}
+
   /* ---------- responsive ---------- */
   @media (max-width:1120px){
     .layout{grid-template-columns:290px minmax(0,1fr)}
@@ -822,7 +849,7 @@
             <div class="link-line dim"></div>
             <div class="node"><span class="node-t">আসল কাজ</span><span class="node-s">ফাইল · shell · API brain</span></div>
           </div>
-          <p class="bridge-note">সংযোগটা শুরু হয় <b>এই UI থেকেই</b> — ডানদিকের একটা বোতাম চাপলেই UI নিজে তোমার PC-তে Engine খুঁজে নেয়, pairing request পাঠায়, আর PC-র স্ক্রিনে একবার <b>"Allow"</b> চাপলেই জোড়া লেগে যায় — key টাইপ করতে হয় না। Engine PC-তে চালু না থাকলে পথ নিচের Launcher-টা: UI ওটা বানিয়ে দেয়, একবার চালালেই ওটা পাবলিক GitHub repo থেকে Engine নামিয়ে চালু করে দেয়।</p>
+          <p class="bridge-note">সংযোগটা শুরু হয় <b>এই UI থেকেই</b> — ডানদিকের একটা বোতাম চাপলেই UI নিজে তোমার PC-তে Engine খুঁজে নেয়, pairing request পাঠায়, আর PC-র স্ক্রিনে একবার <b>"Allow"</b> চাপলেই জোড়া লেগে যায় — key টাইপ করতে হয় না। Engine PC-তে চালু না থাকলে পথ ডানদিকের প্যানেলের STEP 2 Launcher-টা: UI ওটা বানিয়ে দেয়, একবার চালালেই ওটা পাবলিক GitHub repo থেকে Engine নামিয়ে চালু করে দেয়।</p>
           <ol class="bridge-steps-list">
             <li><b>AUTO-১.</b> UI নিজে 127.0.0.1 / localhost-এ Engine খোঁজে — পেজ খুললেই, আর প্রতি ১২ সেকেন্ডে আবার</li>
             <li><b>AUTO-২.</b> Engine পেলে pairing request যায় — PC-র স্ক্রিনে একবার "Allow" চাপলেই key ছাড়া জোড়া লাগে (পুরনো Engine অটো-পেয়ারিং না দিলে শুধু একবার key চায়)</li>
@@ -830,9 +857,7 @@
           </ol>
           <div class="launcher-box">
             <div class="launcher-t">ENGINE PC-তে চালু নেই?</div>
-            <p>এই বোতামে ক্লিক করলেই UI নিজে একটা মাত্র ছোট্ট Launcher (.bat) বানিয়ে দেবে — সেটা একবার ডাবল-ক্লিক করলেই Launcher পাবলিক GitHub repo (KingKibria/kamla-dei) থেকে Engine clone করে চালু করে দেয়; আগের বার নামানো Engine থাকলে pull করে হালনাগাদও করে নেয়। Engine চালু হলেই এই UI নিজে তাকে খুঁজে নেবে — তারপর ফিরে এসে শুধু ONE-CLICK CONNECT।</p>
-            <button type="button" class="btn" id="launcherBtn">⬇ Engine Launcher বানাও (UI থেকেই)</button>
-            <p class="launcher-note" id="launcherNote">Launcher-টা এই ব্রাউজারেই তৈরি হয় — ডাউনলোড হয় শুধু এই একটা .bat ফাইল। PC-তে Git না থাকলে Launcher নিজে Git-এর ডাউনলোড পেজ খুলে দেবে।</p>
+            <p class="launcher-note">Launcher বোতামটা এখন ডানদিকের প্যানেলে — ONE-CLICK CONNECT-এর ঠিক নিচে, STEP 2-তে। ওখান থেকেই Launcher নামিয়ে নিচের ধাপে ধাপে গাইড ধরে এগোলেই সংযোগ হবে।</p>
           </div>
         </div>
         <div class="bridge-card">
@@ -845,6 +870,18 @@
             <div><span>BRAIN CHAIN</span><b id="eiKeys">—</b></div>
           </div>
           <button type="button" class="one-click-btn" id="connectBtn">⚡ ONE-CLICK PC CONNECT</button>
+          <div class="step2-box">
+            <div class="step2-t">STEP 2 · ENGINE এখনো PC-তে চালু হয়নি?</div>
+            <button type="button" class="launcher-dl-btn" id="launcherBtn">📥 STEP 2 — Engine Launcher ডাউনলোড করো</button>
+            <p class="dl-state" id="launcherDlState">Launcher এখনো নামাওনি। Engine PC-তে না চললে প্রথমে এই Launcher-টাই লাগবে — একটাই ছোট্ট .bat ফাইল, এই ব্রাউজারেই তৈরি হয়।</p>
+            <button type="button" class="btn check-btn" id="checkEngineBtn">🔄 Engine চালু হয়েছে কিনা দেখো</button>
+            <ol class="connect-steps" id="connectSteps">
+              <li><span class="cs-txt">Engine Launcher ডাউনলোড করো</span><span class="step-state" id="step1State" data-state="current">এখন এটা করো → নিচের কমলা বোতাম</span></li>
+              <li><span class="cs-txt">Downloads ফোল্ডার থেকে .bat ফাইলটা ডাবল-ক্লিক করে চালাও — কালো উইন্ডোটা খোলা রাখো</span><span class="step-state" id="step2State" data-state="pending">অপেক্ষায়</span></li>
+              <li><span class="cs-txt">উপরের ⚡ ONE-CLICK PC CONNECT বোতামটা চাপো</span><span class="step-state" id="step3State" data-state="pending">অপেক্ষায়</span></li>
+              <li><span class="cs-txt">PC-র স্ক্রিনে Kamla Dei-র ব্যানারে ✓ Allow চাপো</span><span class="step-state" id="step4State" data-state="pending">অপেক্ষায়</span></li>
+            </ol>
+          </div>
           <div class="steps bridge-hs" id="bridgeSteps" hidden></div>
           <details class="key-details" id="keyDetails">
             <summary>KD- key দিয়ে লগইন — শুধু Engine অটো-পেয়ারিং না দিলে লাগবে</summary>
@@ -1595,7 +1632,7 @@
       engineNode = $("#engineNode"), linkLine = $("#linkLine"), bridgeKey = $("#bridgeKey"),
       engineInfo = $("#engineInfo"),
       eiVer = $("#eiVer"), eiUser = $("#eiUser"), eiTools = $("#eiTools"), eiBrain = $("#eiBrain"), eiKeys = $("#eiKeys");
-  var OFFLINE_HELP = "Engine এই PC-তে চলছে না — তাই লিংক হয়নি, আর কোনো ভুয়া CONNECTED-ও দেখানো হচ্ছে না। পথটা এই প্যানেলেই: \"Engine Launcher বানাও\" বোতামটা চাপো — UI নিজে একটা ছোট্ট Launcher (.bat) বানিয়ে দেবে; সেটা একবার ডাবল-ক্লিক করলেই Launcher পাবলিক GitHub repo থেকে Engine clone করে চালু করে দেয়। তারপর ONE-CLICK CONNECT চাপলেই pairing হয়ে জোড়া লেগে যাবে। ততক্ষণ এই UI ডেমো মোডেই চলবে।";
+  var OFFLINE_HELP = "Engine এই PC-তে চলছে না — তাই লিংক হয়নি, আর কোনো ভুয়া CONNECTED-ও দেখানো হচ্ছে না। পথটা এই প্যানেলেই: \"STEP 2 — Engine Launcher ডাউনলোড করো\" বোতামটা চাপো — UI নিজে একটা ছোট্ট Launcher (.bat) বানিয়ে দেবে; সেটা একবার ডাবল-ক্লিক করলেই Launcher পাবলিক GitHub repo থেকে Engine clone করে চালু করে দেয়। তারপর ONE-CLICK CONNECT চাপলেই pairing হয়ে জোড়া লেগে যাবে। ততক্ষণ এই UI ডেমো মোডেই চলবে।";
 
   function engRequest(method, path, body, timeoutMs){
     var headers = {};
@@ -1733,6 +1770,7 @@
     connectBtn.disabled = eng.busy || eng.linked;
     disconnectBtn.disabled = !(eng.linked || eng.pairing);
     if(retryBtn) retryBtn.disabled = eng.busy;
+    if(typeof updateConnectSteps === "function") updateConnectSteps();
   }
 
   function hsRow(label){
@@ -2189,43 +2227,173 @@
     scrollChat();
   }
 
-  /* ---------- engine launcher : UI নিজেই একটা মাত্র .bat বানিয়ে দেয় — Launcher পাবলিক GitHub repo (KingKibria/kamla-dei) থেকে clone/pull করে START.bat চালায় ---------- */
-  var launcherBtn = $("#launcherBtn"), launcherNote = $("#launcherNote");
-  if(launcherBtn) launcherBtn.addEventListener("click", function(){
+  /* ---------- engine launcher + numbered connect guide ----------
+     STEP 2 বোতামটা bridge-card-এর ভেতরে, ONE-CLICK CONNECT-এর ঠিক নিচে —
+     পেজে এই একটাই launcher বোতাম (id="launcherBtn"), তাই listener সবসময়
+     এটাতেই বাঁধা থাকে। ক্লিকে: best-effort preflight (Windows কিনা,
+     Blob/URL download support, GitHub repo-তে পৌঁছানো যায় কিনা) — fail
+     হলেও .bat ডাউনলোড হয়, আর fail-এর লেখা #launcherDlState-তে থেকে
+     যায় (পরের ক্লিক পর্যন্ত; 6s probe timer সেটা মোছে না)। .bat-টা
+     goto-label flow-এ চলে, প্রতিটা ধাপে নম্বর-দেওয়া echo, error-এ
+     pause — কালো উইন্ডো নিজে থেকে কখনো বন্ধ হয় না। */
+  var launcherBtn = $("#launcherBtn"), launcherDlState = $("#launcherDlState"), checkEngineBtn = $("#checkEngineBtn");
+  var launcherDownloaded = false, engineCheckTried = false, launcherFailText = "";
+
+  function setStepState(id, state, text){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.setAttribute("data-state", state);
+    el.textContent = text;
+  }
+  function updateConnectSteps(){
+    if(eng.linked){
+      setStepState("step1State", "done", "✔ হয়ে গেছে");
+      setStepState("step2State", "done", "✔ Engine চলছে");
+      setStepState("step3State", "done", "✔ CONNECTED");
+      setStepState("step4State", "done", "✔ Allow হয়ে গেছে");
+    } else if(eng.pairing){
+      setStepState("step1State", "done", "✔ হয়ে গেছে");
+      setStepState("step2State", "done", "✔ Engine চলছে");
+      setStepState("step3State", "done", "✔ Pairing request গেছে");
+      setStepState("step4State", "current", "এখন এটা করো → PC-র স্ক্রিনে Allow চাপো");
+    } else if(eng.present){
+      setStepState("step1State", "done", "✔ Engine already running — skip");
+      setStepState("step2State", "done", "✔ Engine already running — skip");
+      setStepState("step3State", "current", "এখন এটা করো → উপরের ONE-CLICK CONNECT চাপো");
+      setStepState("step4State", "pending", "অপেক্ষায়");
+    } else if(launcherDownloaded){
+      setStepState("step1State", "done", "✔ নেমে গেছে");
+      setStepState("step2State", "current", engineCheckTried ? "Engine পাইনি — Launcher-টা চালিয়েছ তো? চালিয়ে আবার দেখো" : "এখন এটা করো → Downloads থেকে .bat-টা চালাও");
+      setStepState("step3State", "pending", "অপেক্ষায়");
+      setStepState("step4State", "pending", "অপেক্ষায়");
+    } else {
+      setStepState("step1State", "current", "এখন এটা করো → নিচের কমলা বোতাম");
+      setStepState("step2State", engineCheckTried ? "current" : "pending", engineCheckTried ? "আগে Launcher নামিয়ে চালাও — তারপর আবার দেখো" : "অপেক্ষায়");
+      setStepState("step3State", "pending", "অপেক্ষায়");
+      setStepState("step4State", "pending", "অপেক্ষায়");
+    }
+  }
+
+  function setLauncherState(text, cls){
+    if(!launcherDlState) return;
+    launcherDlState.textContent = text;
+    launcherDlState.className = "dl-state" + (cls ? " " + cls : "");
+  }
+
+  function buildLauncherBat(){
     var lines = [
       "@echo off",
+      "setlocal EnableExtensions",
       "title Kamla Dei Engine Launcher",
-      "echo Kamla Dei Engine Launcher — public GitHub repo theke Engine ana hocche, puro one-click.",
-      "echo (ei Launcher-ta UI baniye diyeche; ager purono clone thakle pull kore halnagad hobe)",
-      "cd /d %USERPROFILE%",
-      "where git >nul 2>nul",
-      "if errorlevel 1 ( echo Git paoa jayni — Git download page khule dicchi, install kore ei file-ta abar chalao... & start https://git-scm.com/download/win & pause & exit /b )",
-      "if not exist kamla-dei-master ( git clone https://github.com/KingKibria/kamla-dei kamla-dei-master )",
-      "if errorlevel 1 ( echo Clone hoyni — GitHub repo page khule dicchi... & start https://github.com/KingKibria/kamla-dei & pause & exit /b )",
-      "cd kamla-dei-master",
-      "git checkout main",
-      "git pull --ff-only",
-      "echo Python runtime check hocche...",
-      "where python >nul 2>nul && goto :pyok",
-      "where py >nul 2>nul && goto :pyok",
-      "echo Python paoa jayni — Engine chalaite Python lage. Python download page khule dicchi, install kore ei file-ta abar chalao...",
+      "echo ============================================",
+      "echo   Kamla Dei Engine Launcher",
+      "echo   UI theke toiri - GitHub public repo theke Engine asbe",
+      "echo ============================================",
+      "echo.",
+      "echo [1/4] Python khujchi...",
+      "where python >nul 2>nul",
+      "if %errorlevel%==0 goto KD_PY_OK",
+      "where py >nul 2>nul",
+      "if %errorlevel%==0 goto KD_PY_OK",
+      "echo.",
+      "echo Python paoa jayni - Engine chalate Python lage.",
+      "echo Python download page khule dicchi - install kore ei file-ta abar chalao.",
       "start https://www.python.org/downloads/windows/",
       "pause",
-      "exit /b",
-      ":pyok",
-      "if exist START.bat ( call START.bat ) else ( echo Engine start file pelam na — repo page khulchi... & start https://github.com/KingKibria/kamla-dei & pause )"
+      "exit /b 1",
+      ":KD_PY_OK",
+      "echo Python paoa geche.",
+      "echo.",
+      "echo [2/4] Git khujchi...",
+      "where git >nul 2>nul",
+      "if %errorlevel%==0 goto KD_GIT_OK",
+      "echo.",
+      "echo Git paoa jayni - Engine namate Git lage.",
+      "echo Git download page khule dicchi - install kore ei file-ta abar chalao.",
+      "start https://git-scm.com/download/win",
+      "pause",
+      "exit /b 1",
+      ":KD_GIT_OK",
+      "echo Git paoa geche.",
+      "echo.",
+      "echo [3/4] Engine ana hocche - GitHub: KingKibria/kamla-dei ...",
+      "cd /d \"%USERPROFILE%\"",
+      "if exist \"kamla-dei-master\\.git\" goto KD_PULL",
+      "git clone https://github.com/KingKibria/kamla-dei kamla-dei-master",
+      "if %errorlevel%==0 goto KD_CLONED",
+      "echo.",
+      "echo Clone hoyni - net ba GitHub-e somossa hote pare. Upar er error lekha-ta dekho.",
+      "pause",
+      "exit /b 1",
+      ":KD_PULL",
+      "cd /d \"%USERPROFILE%\\kamla-dei-master\"",
+      "git pull --ff-only",
+      "if %errorlevel%==0 goto KD_READY",
+      "echo.",
+      "echo Pull hoyni - local copy-te somossa thakte pare. Upar er error lekha-ta dekho.",
+      "pause",
+      "exit /b 1",
+      ":KD_CLONED",
+      "cd /d \"%USERPROFILE%\\kamla-dei-master\"",
+      ":KD_READY",
+      "echo.",
+      "echo [4/4] Engine chalano hocche...",
+      "if exist START.bat goto KD_START",
+      "echo.",
+      "echo START.bat pelam na - repo thik moto name ni mone hocche.",
+      "pause",
+      "exit /b 1",
+      ":KD_START",
+      "call START.bat",
+      "echo.",
+      "echo Engine bondho hoye geche. Abar chalate ei file-ta abar double-click koro.",
+      "pause",
+      "endlocal"
     ];
-    var blob = new Blob([lines.join("\r\n")], { type: "application/octet-stream" });
+    return lines.join("\r\n");
+  }
+
+  if(launcherBtn) launcherBtn.addEventListener("click", function(){
+    launcherFailText = "";
+    var fails = [];
+    var plat = ((navigator.platform || "") + " " + (navigator.userAgent || "")).toLowerCase();
+    if(plat.indexOf("win") === -1) fails.push("এই ডিভাইসটা Windows PC মনে হচ্ছে না — .bat Launcher শুধু Windows-এই চলবে।");
+    if(!(window.Blob && window.URL && typeof URL.createObjectURL === "function")) fails.push("এই ব্রাউজারে ফাইল ডাউনলোডের সাপোর্ট পাইনি — Chrome/Edge-এ খুলে আবার চেষ্টা করো।");
+    var blob = new Blob([buildLauncherBat()], { type: "application/octet-stream" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "KamlaDei-Engine-Launcher.bat";
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); if(a.parentNode) a.parentNode.removeChild(a); }, 500);
-    if(launcherNote) launcherNote.textContent = "Launcher তৈরি হয়ে নেমে গেছে ✔ — ফাইলটা একবার ডাবল-ক্লিক করে চালাও। ওটা পাবলিক GitHub repo থেকে Engine clone করে চালু করবে (আগের clone থাকলে pull করে হালনাগাদ)। Engine উঠলেই এই প্যানেল নিজে থেকে তাকে খুঁজে নেবে (অটো-ডিসকভারি চলছেই); তারপর শুধু ONE-CLICK CONNECT।";
-    addLog("cy", "pc bridge · engine launcher generated in-ui (single .bat → public repo clone)");
-    toast("Launcher তৈরি — একবার চালালেই Engine চালু হবে।");
-    setTimeout(function(){ quietProbe(true); }, 6000);
+    launcherDownloaded = true;
+    if(fails.length){
+      launcherFailText = "⚠ " + fails.join(" ") + " তবুও Launcher নামিয়ে দিয়েছি — Windows PC-তে ফাইলটা চালালেই Engine নামবে।";
+      setLauncherState(launcherFailText, "fail");
+      bridgeSteps.hidden = false;
+      hsFail(hsRow("launcher preflight · " + fails[0]), "preflight warning — তবুও ডাউনলোড হয়েছে");
+    } else {
+      setLauncherState("✔ Launcher নেমে গেছে — এবার Downloads ফোল্ডার থেকে KamlaDei-Engine-Launcher.bat-টা ডাবল-ক্লিক করে চালাও। কালো উইন্ডোটা খোলা রাখবে (ওটাই Engine চালায়)। তারপর নিচের “Engine চালু হয়েছে কিনা দেখো” বোতামটা চাপো।", "ok");
+    }
+    if(window.fetch){
+      fetch("https://github.com/KingKibria/kamla-dei", { mode: "no-cors", cache: "no-store" }).catch(function(){
+        launcherFailText = "⚠ এই ব্রাউজার থেকে GitHub-এ পৌঁছানো যাচ্ছে না — Launcher নামলেও PC-তে clone আটকাতে পারে। PC-র নেট চালু আছে কিনা দেখে Launcher-টা চালাও।";
+        setLauncherState(launcherFailText, "fail");
+      });
+    }
+    updateConnectSteps();
+    addLog("cy", "pc bridge · engine launcher generated in-ui (step-2 button → single .bat, git clone from public repo)");
+    toast("Launcher তৈরি — Downloads থেকে একবার চালালেই Engine চালু হবে।");
+    setTimeout(function(){ if(!launcherFailText) quietProbe(true); }, 6000);
   });
+
+  if(checkEngineBtn) checkEngineBtn.addEventListener("click", function(){
+    engineCheckTried = true;
+    toast("localhost-এ Engine খোঁজা হচ্ছে…");
+    quietProbe(true);
+    setTimeout(function(){ updateConnectSteps(); }, 1800);
+  });
+
+  updateConnectSteps();
 
   connectBtn.addEventListener("click", function(){ bridgeConnect(false); });
   disconnectBtn.addEventListener("click", bridgeDisconnect);
