@@ -551,6 +551,24 @@
   /* ---------- step-2 launcher + numbered connect guide ---------- */
   .step2-box{margin-top:16px;border:1px dashed rgba(255,154,46,.55);background:rgba(255,154,46,.05);padding:14px}
   .step2-t{font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--orange)}
+  /* ---------- LAN connect (phone → PC) ---------- */
+  .lan-box{margin-top:16px;border:1px dashed rgba(63,210,255,.5);background:rgba(63,210,255,.045);padding:14px}
+  .lan-t{font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--cyan-hot)}
+  .lan-desc{font-family:var(--bn);font-size:13.5px;color:var(--muted);line-height:1.6;margin:7px 0 0}
+  .lan-desc b{color:var(--cyan-hot);font-weight:600}
+  .lan-row{display:flex;gap:9px;margin-top:11px}
+  .lan-field{display:grid;gap:5px;min-width:0}
+  .lan-field.grow{flex:1}
+  .lan-field.port{flex:none;width:104px}
+  .lan-field label{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--faint)}
+  .lan-input{width:100%;background:rgba(10,20,36,.9);border:1px solid var(--line);color:var(--ink);font-family:var(--mono);font-size:14px;padding:10px 11px;outline:none;transition:border-color .2s, box-shadow .2s}
+  .lan-input:focus{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(34,211,238,.4)}
+  .lan-input::placeholder{color:var(--faint)}
+  .lan-btn{display:block;width:100%;margin-top:11px}
+  .lan-state{font-family:var(--bn);font-size:13.5px;color:var(--muted);line-height:1.55;margin:10px 0 0;overflow-wrap:break-word}
+  .lan-state.ok{color:#a7f3d0}
+  .lan-state.fail{color:#fecdd3}
+  @media (max-width:420px){.lan-field.port{width:88px}}
   .launcher-dl-btn{display:block;width:100%;margin-top:11px;padding:16px 12px;cursor:pointer;
     font-family:var(--bn);font-weight:700;font-size:17px;line-height:1.35;color:#2a1503;
     background:linear-gradient(90deg,var(--orange),#ffb35c);border:1px solid #ffc98a;
@@ -861,7 +879,7 @@
           </div>
         </div>
         <div class="bridge-card">
-          <div class="bridge-status"><span class="dot amber" id="bridgeDot"></span><span id="bridgeStatusTxt">LINK · OFFLINE</span><span class="bridge-ep">PC · AUTO-DISCOVER</span></div>
+          <div class="bridge-status"><span class="dot amber" id="bridgeDot"></span><span id="bridgeStatusTxt">LINK · OFFLINE</span><span class="bridge-ep" id="bridgeEp">PC · AUTO-DISCOVER</span></div>
           <div class="engine-info" id="engineInfo" hidden>
             <div><span>ENGINE</span><b id="eiVer">—</b></div>
             <div><span>USER · PLAN</span><b id="eiUser">—</b></div>
@@ -870,6 +888,22 @@
             <div><span>BRAIN CHAIN</span><b id="eiKeys">—</b></div>
           </div>
           <button type="button" class="one-click-btn" id="connectBtn">⚡ ONE-CLICK PC CONNECT</button>
+          <div class="lan-box">
+            <div class="lan-t">📱 ফোন থেকে PC-তে (LAN)</div>
+            <p class="lan-desc">ফোন আর PC একই Wi-Fi/LAN-এ থাকলে PC-র IP ঠিকানাটা বসাও — UI সরাসরি LAN-এ Engine খুঁজবে; পেলে আগের মতোই PC-র স্ক্রিনে একবার <b>"Allow"</b> চাপলেই জোড়া লাগবে, তারপর status sync হবে।</p>
+            <div class="lan-row">
+              <div class="lan-field grow">
+                <label for="lanHost">PC-র IP / HOST</label>
+                <input id="lanHost" class="lan-input" type="text" placeholder="192.168.1.5" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="lan-field port">
+                <label for="lanPort">PORT</label>
+                <input id="lanPort" class="lan-input" type="number" value="8790" min="1" max="65535" autocomplete="off" />
+              </div>
+            </div>
+            <button type="button" class="btn lan-btn" id="lanBtn">🔍 LAN Engine খোঁজো</button>
+            <p class="lan-state" id="lanState">এখনো LAN-এ খোঁজা হয়নি। সফল ঠিকানাটা শুধু এই ব্রাউজারেই মনে থাকবে — pairing token বা session token কখনো সেভ হয় না, ওগুলো শুধু এই ট্যাবের মেমরিতে থাকে।</p>
+          </div>
           <div class="step2-box">
             <div class="step2-t">STEP 2 · ENGINE এখনো PC-তে চালু হয়নি?</div>
             <button type="button" class="launcher-dl-btn" id="launcherBtn">📥 STEP 2 — Engine Launcher ডাউনলোড করো</button>
@@ -1621,6 +1655,7 @@
      কারণ Engine-এর CORS ঠিক এই হেডারটাই অনুমোদন করে।
      No simulated success: Engine সাড়া না দিলে status সৎভাবে OFFLINE-ই থাকে। */
   var ENGINE_CANDIDATES = ["http://127.0.0.1:8790", "http://localhost:8790"];
+  var LAN_BASE = "";   /* এই সেশনে LAN probe সফল হলে সেট হয় — findEngine তখন LAN ঠিকানাটা আগে দেখে। পেজ লোডে সেভ-করা ঠিকানা দিয়ে auto-probe হয় না */
   var ENGINE_BASE = ENGINE_CANDIDATES[0];
   var eng = { present:false, linked:false, authFail:false, busy:false, pairing:false, key:"", token:"", user:"", plan:"", info:null };
   var pairCtx = { timer:null, row:null, deadline:0 };
@@ -1628,7 +1663,7 @@
   var bridgeDot = $("#bridgeDot"), bridgeStatusTxt = $("#bridgeStatusTxt"),
       pcDot = $("#pcDot"), pcLinkState = $("#pcLinkState"), scenePc = $("#scenePc"),
       connectBtn = $("#connectBtn"), disconnectBtn = $("#disconnectBtn"), retryBtn = $("#retryBtn"),
-      bridgeSteps = $("#bridgeSteps"), bridgeNote = $("#bridgeNote"),
+      bridgeSteps = $("#bridgeSteps"), bridgeNote = $("#bridgeNote"), bridgeEp = $("#bridgeEp"),
       engineNode = $("#engineNode"), linkLine = $("#linkLine"), bridgeKey = $("#bridgeKey"),
       engineInfo = $("#engineInfo"),
       eiVer = $("#eiVer"), eiUser = $("#eiUser"), eiTools = $("#eiTools"), eiBrain = $("#eiBrain"), eiKeys = $("#eiKeys");
@@ -1660,15 +1695,19 @@
   }
   function engFetch(path, timeoutMs){ return engRequest("GET", path, null, timeoutMs); }
 
+  function engineCandidates(){
+    return LAN_BASE ? [LAN_BASE].concat(ENGINE_CANDIDATES) : ENGINE_CANDIDATES.slice();
+  }
   function findEngine(){
     if(!window.fetch) return Promise.reject(new Error("no fetch"));
+    var cands = engineCandidates();
     var i = 0;
     function attempt(){
-      ENGINE_BASE = ENGINE_CANDIDATES[i];
+      ENGINE_BASE = cands[i];
       return engFetch("/api/health", 1500).catch(function(err){
         i++;
-        if(i < ENGINE_CANDIDATES.length) return attempt();
-        ENGINE_BASE = ENGINE_CANDIDATES[0];
+        if(i < cands.length) return attempt();
+        ENGINE_BASE = cands[0];
         throw err;
       });
     }
@@ -1763,6 +1802,7 @@
     pcLinkState.textContent = label;
     if(scenePc) scenePc.textContent = label;
     bridgeStatusTxt.textContent = "LINK · " + label + (eng.info && eng.info.version !== undefined ? " · ENGINE v" + String(eng.info.version).replace(/^v/i,"") : "");
+    if(bridgeEp) bridgeEp.textContent = LAN_BASE ? ("LAN · " + LAN_BASE.replace(/^http:\/\//, "")) : "PC · AUTO-DISCOVER";
     pcDot.classList.toggle("amber", !eng.linked);
     bridgeDot.classList.toggle("amber", !eng.linked);
     engineNode.classList.toggle("on", eng.present || eng.linked);
@@ -1885,7 +1925,7 @@
     bridgeSteps.innerHTML = "";
     bridgeNote.textContent = "এক ক্লিকেই সব হচ্ছে — UI নিজে Engine খুঁজছে, নিজে জোড়া লাগাচ্ছে, নিজে status মেলাচ্ছে। তোমাকে আর কিছু করতে হবে না…";
     addLog("cy", "pc bridge · one-click connect started" + (fromChat ? " (chat command)" : ""));
-    var row1 = hsRow("খোঁজা হচ্ছে · এই PC-তে Engine (127.0.0.1 / localhost :8790)");
+    var row1 = hsRow(LAN_BASE ? ("খোঁজা হচ্ছে · LAN Engine (" + LAN_BASE + ")") : "খোঁজা হচ্ছে · এই PC-তে Engine (127.0.0.1 / localhost :8790)");
     findEngine().then(function(r){
       eng.present = true;
       var info = engineInfoFrom(r.json);
@@ -2407,6 +2447,104 @@
     if(eng.authFail){ eng.authFail = false; renderEngine(); }
   });
   bridgeKey.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); bridgeConnect(false); } });
+
+  /* ---------- LAN connect : ফোন থেকে PC-তে (একই Wi-Fi/LAN) ----------
+     "LAN Engine খোঁজো" চাপলে http://<ip>:<port>/api/health-এ probe যায়।
+     Engine পেলে LAN_BASE সেট হয় আর হুবহু আগের pairing ফ্লোই চলে
+     (bridgeConnect → PC-র স্ক্রিনে Allow → status sync)। না পেলে সৎ
+     error বার্তা — status OFFLINE-ই থাকে, কোনো ভুয়া CONNECTED নয়।
+     সফল ঠিকানাটা localStorage-এ শুধু "kd_lan_url" হিসেবে থাকে —
+     pairing token / session token কখনোই localStorage-এ যায় না
+     (ওগুলো শুধু এই ট্যাবের মেমরিতে)। পেজ আবার খুললে সেভ ঠিকানা
+     ইনপুটে বসে থাকে, কিন্তু auto-probe হয় না। */
+  var lanHost = $("#lanHost"), lanPort = $("#lanPort"), lanBtn = $("#lanBtn"), lanState = $("#lanState");
+  var lanBusy = false;
+
+  function setLanState(text, cls){
+    if(!lanState) return;
+    lanState.textContent = text;
+    lanState.className = "lan-state" + (cls ? " " + cls : "");
+  }
+  function lanTarget(){
+    var raw = ((lanHost && lanHost.value) || "").trim().replace(/^https?:\/\//i, "").split("/")[0];
+    var embeddedPort = "";
+    var ci = raw.lastIndexOf(":");
+    if(ci > 0){ embeddedPort = raw.slice(ci + 1); raw = raw.slice(0, ci); }
+    if(!raw) return null;
+    var port = parseInt(((lanPort && lanPort.value) || "").trim(), 10);
+    if(!(port > 0 && port < 65536)) port = parseInt(embeddedPort, 10);
+    if(!(port > 0 && port < 65536)) port = 8790;
+    return { base: "http://" + raw + ":" + port };
+  }
+  function lanHealth(base){
+    var ctrl = ("AbortController" in window) ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 2600) : null;
+    return fetch(base + "/api/health", { method: "GET", mode: "cors", cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
+      .then(function(res){
+        if(timer) clearTimeout(timer);
+        return res.text().then(function(txt){
+          var json = null;
+          try{ json = JSON.parse(txt); }catch(e){ json = null; }
+          return { status: res.status, ok: res.ok, json: json };
+        }, function(){ return { status: res.status, ok: res.ok, json: null }; });
+      })
+      .catch(function(err){ if(timer) clearTimeout(timer); throw err; });
+  }
+  function lanSearch(){
+    if(lanBusy || eng.busy) return;
+    if(eng.linked){ toast("PC লিংক আগেই চালু আছে — Engine-এর সাথেই যুক্ত আছ।"); return; }
+    if(!window.fetch){ setLanState("⚠ এই ব্রাউজারে fetch নেই — LAN লিংক সম্ভব নয়।", "fail"); return; }
+    var t = lanTarget();
+    if(!t){
+      setLanState("⚠ আগে PC-র IP ঠিকানাটা লেখো — যেমন 192.168.1.5। ফোন আর PC একই Wi-Fi/LAN-এ থাকতে হবে।", "fail");
+      if(lanHost) lanHost.focus();
+      return;
+    }
+    lanBusy = true;
+    if(lanBtn) lanBtn.disabled = true;
+    setLanState("খোঁজা হচ্ছে · " + t.base + "/api/health …");
+    addLog("cy", "pc bridge · LAN probe → " + t.base + "/api/health");
+    lanHealth(t.base).then(function(r){
+      lanBusy = false;
+      if(lanBtn) lanBtn.disabled = false;
+      if(!(r.ok || (r.json && typeof r.json === "object"))){
+        setLanState("✕ " + t.base + " সাড়া দিলেও Engine-এর health মেলেনি (HTTP " + r.status + ") — ঠিকানা আর port মিলিয়ে আবার চেষ্টা করো। status OFFLINE-ই আছে।", "fail");
+        addLog("warn", "pc bridge · LAN probe — unexpected response from " + t.base + " · HTTP " + r.status);
+        return;
+      }
+      LAN_BASE = t.base; ENGINE_BASE = t.base;
+      eng.present = true;
+      var info = engineInfoFrom(r.json);
+      if(info) applyEngineData(info);
+      try{ localStorage.setItem("kd_lan_url", t.base); }catch(e){ /* storage বন্ধ থাকলেও লিংক চলবে — শুধু ঠিকানা মনে থাকবে না */ }
+      setLanState("✔ Engine পাওয়া গেছে — " + t.base + " · ঠিকানাটা মনে রাখা হলো। এবার pairing চলছে — PC-র স্ক্রিনে Allow চাপলেই জোড়া লাগবে।", "ok");
+      addLog("ok", "pc bridge · LAN engine found at " + t.base + " — pairing শুরু হচ্ছে");
+      renderEngine();
+      bridgeConnect(false);
+    }).catch(function(){
+      lanBusy = false;
+      if(lanBtn) lanBtn.disabled = false;
+      setLanState("✕ " + t.base + "-এ কোনো Engine পাওয়া যায়নি — PC-তে Engine চালু আছে তো? ফোন আর PC একই Wi-Fi/LAN-এ আছে তো? IP আর port (ডিফল্ট 8790) মিলিয়ে আবার চেষ্টা করো। status সৎভাবে OFFLINE-ই থাকছে।", "fail");
+      addLog("warn", "pc bridge · LAN probe failed — no engine at " + t.base);
+      toast("LAN-এ Engine পাওয়া যায়নি — status OFFLINE-ই আছে।");
+    });
+  }
+  if(lanBtn) lanBtn.addEventListener("click", lanSearch);
+  [lanHost, lanPort].forEach(function(inp){
+    if(inp) inp.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); lanSearch(); } });
+  });
+  /* সেভ করা LAN ঠিকানা ইনপুটে বসাও — কিন্তু নিজে থেকে probe নয় */
+  try{
+    var savedLan = localStorage.getItem("kd_lan_url");
+    if(savedLan){
+      var lm = /^https?:\/\/([^\/:?#]+)(?::(\d+))?/i.exec(savedLan);
+      if(lm && lanHost && lanPort){
+        lanHost.value = lm[1];
+        lanPort.value = lm[2] || "8790";
+        setLanState("আগের সফল LAN ঠিকানা বসানো আছে — " + savedLan + " · Engine খুঁজতে উপরের “LAN Engine খোঁজো” বোতামটা চাপো (নিজে থেকে probe হয় না)।");
+      }
+    }
+  }catch(e){ /* storage পড়া না গেলে ইনপুট ফাঁকাই থাকবে */ }
 
   /* auto-discover on load + presence watch (honest OFFLINE if engine vanishes) */
   renderEngine();
