@@ -1638,12 +1638,15 @@
 
   /* ---------- PC bridge : real engine link protocol (Engine v1.3.2) ----------
      1) Probe:  GET  /api/health             — auth ছাড়াই Engine আছে কিনা
-     2) Pair:   POST /api/bridge/pair {}     — key ছাড়া অটো-পেয়ারিং:
-                token সরাসরি এলে সঙ্গে সঙ্গেই লিংক; HTTP 202 / {status:"pending"}
-                এলে pairing request PC-তে গেছে — তখন GET /api/bridge/pair?state=waiting
-                poll করে অপেক্ষা (PC-র স্ক্রিনে "Allow" চাপলেই token আসে;
-                denied / 410 = নাকচ, 120s = সময় শেষ — আবার Connect-এ নতুন request);
-                404/405 = এই Engine-এ pairing নেই → KD- key fallback।
+     2) Pair:   POST /api/bridge/pair/request {} — public, token ছাড়া অটো-পেয়ারিং শুরু:
+                {pair_id, code, expires_in:120} এলে pairing request PC-তে গেছে —
+                তখন GET /api/bridge/pair/status?pair_id=<id> poll করে অপেক্ষা
+                (PC-র স্ক্রিনে "Allow" চাপলেই approved উত্তরে token আসে, ঠিক একবারই;
+                denied / 410 = নাকচ, expires_in শেষ = সময় শেষ — আবার Connect-এ
+                নতুন request); 404/405 = এই Engine-এ pairing নেই → KD- key fallback।
+                (Pending তালিকা GET /api/bridge/pair/pending আর Approve/Deny
+                POST /api/bridge/pair/approve {pair_id, ok} Engine-এর নিজের UI-র
+                কাজ — login token লাগে; এই UI-তে ওই ডাক নেই।)
      3) Login:  POST /api/bridge/auth {key}  — redeem-করা KD- key → session token,
                 user name + plan ফেরত আসে (401 = key ভুল, 403 = key এখনো redeem হয়নি)
      4) Status: GET  /api/status             — Bearer token-এ tools / brain / plan
@@ -1658,7 +1661,7 @@
   var LAN_BASE = "";   /* এই সেশনে LAN probe সফল হলে সেট হয় — findEngine তখন LAN ঠিকানাটা আগে দেখে। পেজ লোডে সেভ-করা ঠিকানা দিয়ে auto-probe হয় না */
   var ENGINE_BASE = ENGINE_CANDIDATES[0];
   var eng = { present:false, linked:false, authFail:false, busy:false, pairing:false, key:"", token:"", user:"", plan:"", info:null };
-  var pairCtx = { timer:null, row:null, deadline:0 };
+  var pairCtx = { timer:null, row:null, deadline:0, pairId:"", code:"" };
   var engChat = { id:null, since:0, timer:null, turn:null, startedAt:0, sawBusy:false };
   var bridgeDot = $("#bridgeDot"), bridgeStatusTxt = $("#bridgeStatusTxt"),
       pcDot = $("#pcDot"), pcLinkState = $("#pcLinkState"), scenePc = $("#scenePc"),
@@ -1669,11 +1672,12 @@
       eiVer = $("#eiVer"), eiUser = $("#eiUser"), eiTools = $("#eiTools"), eiBrain = $("#eiBrain"), eiKeys = $("#eiKeys");
   var OFFLINE_HELP = "Engine এই PC-তে চলছে না — তাই লিংক হয়নি, আর কোনো ভুয়া CONNECTED-ও দেখানো হচ্ছে না। পথটা এই প্যানেলেই: \"STEP 2 — Engine Launcher ডাউনলোড করো\" বোতামটা চাপো — UI নিজে একটা ছোট্ট Launcher (.bat) বানিয়ে দেবে; সেটা একবার ডাবল-ক্লিক করলেই Launcher পাবলিক GitHub repo থেকে Engine clone করে চালু করে দেয়। তারপর ONE-CLICK CONNECT চাপলেই pairing হয়ে জোড়া লেগে যাবে। ততক্ষণ এই UI ডেমো মোডেই চলবে।";
 
-  function engRequest(method, path, body, timeoutMs){
+  function engRequest(method, path, body, timeoutMs, opts){
     var headers = {};
     var hasBody = body !== undefined && body !== null;
     if(hasBody) headers["Content-Type"] = "application/json";
-    if(eng.token) headers["Authorization"] = "Bearer " + eng.token;
+    /* pairing-এর public ডাকে (request / status) কোনো token পাঠানো হয় না */
+    if(eng.token && !(opts && opts.noAuth)) headers["Authorization"] = "Bearer " + eng.token;
     var ctrl = ("AbortController" in window) ? new AbortController() : null;
     var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, timeoutMs || 1600) : null;
     var t0 = (window.performance && performance.now) ? performance.now() : new Date().getTime();
@@ -1911,7 +1915,7 @@
 
   function stopPairPoll(){
     if(pairCtx.timer){ clearInterval(pairCtx.timer); pairCtx.timer = null; }
-    eng.pairing = false; pairCtx.row = null;
+    eng.pairing = false; pairCtx.row = null; pairCtx.pairId = ""; pairCtx.code = "";
   }
 
   function bridgeConnect(fromChat){
@@ -1932,7 +1936,7 @@
       if(info) applyEngineData(info);
       hsDone(row1, "Engine পাওয়া গেছে" + (info && info.version !== undefined ? " · v" + String(info.version).replace(/^v/i,"") : "") + " · RTT " + r.rtt + " ms");
       var row2 = hsRow("জোড়া লাগানো হচ্ছে · key ছাড়া অটো-পেয়ারিং চেষ্টা চলছে");
-      engRequest("POST", "/api/bridge/pair", {}, 2200).then(function(pr){
+      engRequest("POST", "/api/bridge/pair/request", {}, 2200, { noAuth:true }).then(function(pr){
         if(pr.ok && pr.json && pr.json.token){
           eng.token = pr.json.token;
           applyEngineData({ user: pr.json.name, plan: pr.json.plan, version: pr.json.version });
@@ -1940,8 +1944,12 @@
           finishHandshake();
           return;
         }
+        if(pr.ok && pr.json && pr.json.pair_id){
+          startPairingWait(row2, pr.json);
+          return;
+        }
         if(pr.status === 202 || (pr.json && pr.json.status === "pending")){
-          startPairingWait(row2);
+          startPairingWait(row2, pr.json || {});
           return;
         }
         if(pr.status === 404 || pr.status === 405){
@@ -2016,13 +2024,17 @@
       needKey(row2, "এই Engine-এ অটো-পেয়ারিং নেই (পুরনো সংস্করণ) — একবার শুধু key লাগবে");
     }
 
-    function startPairingWait(row2){
+    function startPairingWait(row2, pairInfo){
       eng.pairing = true; eng.busy = true;
       pairCtx.row = row2;
-      pairCtx.deadline = Date.now() + 120000;
-      $(".hs-txt", row2).textContent = "pairing request পাঠানো হয়েছে · PC-র স্ক্রিনে Kamla Dei-র \"Allow\" চাপো — অপেক্ষা করছি…";
+      pairInfo = pairInfo || {};
+      pairCtx.pairId = pairInfo.pair_id ? String(pairInfo.pair_id) : "";
+      pairCtx.code = (pairInfo.code !== undefined && pairInfo.code !== null) ? String(pairInfo.code) : "";
+      var expSec = (typeof pairInfo.expires_in === "number" && pairInfo.expires_in > 0) ? pairInfo.expires_in : 120;
+      pairCtx.deadline = Date.now() + expSec * 1000;
+      $(".hs-txt", row2).textContent = "pairing request পাঠানো হয়েছে" + (pairCtx.code ? " · code " + pairCtx.code : "") + " · PC-র স্ক্রিনে Kamla Dei-র \"Allow\" চাপো — অপেক্ষা করছি…";
       renderEngine();
-      bridgeNote.textContent = "Pairing request তোমার PC-তে গেছে — PC-র স্ক্রিনে Kamla Dei-র \"Allow\" বোতামটা চাপলেই key ছাড়াই লিংক হয়ে যাবে। সময় শেষ (২ মিনিট) হলে বা PC থেকে নাকচ হলে আবার ONE-CLICK CONNECT চাপলেই নতুন request যাবে; মাঝপথে থামাতে চাইলে \"সংযোগ ছিন্ন করো\" চাপো।";
+      bridgeNote.textContent = "Pairing request তোমার PC-তে গেছে" + (pairCtx.code ? " — PC-র স্ক্রিনে code " + pairCtx.code + " মিলিয়ে দেখো, তারপর" : " — PC-র স্ক্রিনে") + " Kamla Dei-র \"Allow\" বোতামটা চাপলেই key ছাড়াই লিংক হয়ে যাবে। সময় শেষ (২ মিনিট) হলে বা PC থেকে নাকচ হলে আবার ONE-CLICK CONNECT চাপলেই নতুন request যাবে; মাঝপথে থামাতে চাইলে \"সংযোগ ছিন্ন করো\" চাপো।";
       addLog("cy", "pc bridge · pairing requested — waiting for Allow on PC screen");
       toast("Pairing request PC-তে গেছে — PC-র স্ক্রিনে Allow চাপো।");
       pairCtx.timer = setInterval(pollPairOnce, 2500);
@@ -2039,7 +2051,11 @@
           toast("Pairing-এর সময় শেষ — আবার Connect চাপলে নতুন request যাবে।");
           return;
         }
-        engRequest("GET", "/api/bridge/pair?state=waiting", null, 2000).then(function(pr){
+        if(!pairCtx.pairId){
+          /* Engine pair_id দেয়নি — status poll-এর পথ নেই, deadline পর্যন্ত অপেক্ষা */
+          return;
+        }
+        engRequest("GET", "/api/bridge/pair/status?pair_id=" + encodeURIComponent(pairCtx.pairId), null, 2000, { noAuth:true }).then(function(pr){
           if(!eng.pairing) return;
           if(pr.ok && pr.json && pr.json.token){
             stopPairPoll();
@@ -2048,6 +2064,15 @@
             hsDone(row2, "PC থেকে Allow এসেছে — পেয়ার হয়ে গেছে, key লাগেনি" + (eng.user ? " · " + eng.user : ""));
             addLog("ok", "pc bridge · pairing approved on PC — token received");
             finishHandshake();
+            return;
+          }
+          if(pr.json && pr.json.status === "expired"){
+            stopPairPoll();
+            hsFail(row2, "pairing-এর সময় শেষ — Engine request-টা মেয়াদোত্তীর্ণ করেছে");
+            eng.busy = false; renderEngine();
+            bridgeNote.textContent = "Pairing-এর সময় শেষ হয়ে গেছে — PC-তে Allow চাপা হয়নি। আবার ONE-CLICK CONNECT চাপলেই নতুন pairing request যাবে।";
+            addLog("warn", "pc bridge · pairing expired on engine");
+            toast("Pairing-এর সময় শেষ — আবার Connect চাপলে নতুন request যাবে।");
             return;
           }
           if(pr.status === 410 || (pr.json && (pr.json.status === "denied" || pr.json.denied === true))){
